@@ -5,11 +5,13 @@
 #include <thread>
 #include <vector>
 
+using namespace std;
+
 // Función para contar las ocurrencias de un patrón en una línea
-int matchPattern(std::string patronActual, std::string linea) {
+int matchPattern(string patronActual, string linea) {
     int count = 0;
     size_t posicion = 0;
-    while ((posicion = linea.find(patronActual, posicion)) != std::string::npos) {
+    while ((posicion = linea.find(patronActual, posicion)) != string::npos) {
         // Encontrado un patrón, incrementar el contador
         count++;
         posicion += patronActual.length();
@@ -18,11 +20,11 @@ int matchPattern(std::string patronActual, std::string linea) {
 }
 
 // Función para contar patrones en un rango de líneas
-void contarPatronesEnRango(std::ifstream& textoFile, const std::vector<std::string>& patrones, std::map<std::string, int>& contadorPatrones, int inicio, int fin) {
+void contarPatronesEnRango(ifstream& textoFile, const vector<string>& patrones, map<string, int>& contadorPatrones, int inicio, int fin) {
     for (int i = inicio; i <= fin; i++) {
-        std::string linea;
-        if (std::getline(textoFile, linea)) {
-            for (const std::string& patron : patrones) {
+        string linea;
+        if (getline(textoFile, linea)) {
+            for (const string& patron : patrones) {
                 contadorPatrones[patron] += matchPattern(patron, linea);
             }
         }
@@ -30,44 +32,44 @@ void contarPatronesEnRango(std::ifstream& textoFile, const std::vector<std::stri
 }
 
 int main() {
-    std::ifstream patronesFile("patrones.txt");
-    std::ifstream textoFile("texto.txt");
+    ifstream patronesFile("TP1/Ejercicio_2/patrones.txt");
+    ifstream textoFile("TP1/Ejercicio_2/texto.txt");
 
     if (!patronesFile.is_open() || !textoFile.is_open()) {
-        std::cerr << "No se pudo abrir uno o ambos archivos." << std::endl;
+        cerr << "No se pudo abrir uno o ambos archivos." << endl;
         return 1;
     }
     
     // Leer patrones y almacenarlos en un vector
-    std::vector<std::string> patrones;
-    std::string patron;
+    vector<string> patrones;
+    string patron;
     
-    while (std::getline(patronesFile, patron)) {
+    while (getline(patronesFile, patron)) {
         patrones.push_back(patron);
     }
     
     // Leer el contenido del archivo de texto línea por línea
-    std::map<std::string, int> contadorPatrones;
+    map<string, int> contadorPatrones;
 
     // Obtener el número de núcleos de CPU disponibles
-    unsigned int numThreads = std::thread::hardware_concurrency();
+    unsigned int numThreads = thread::hardware_concurrency();
     
     // Crear un vector de hilos
-    std::vector<std::thread> threads;
+    vector<thread> threads;
     
     // Leer el contenido del archivo de texto línea por línea y contar patrones en paralelo
     for (unsigned int i = 0; i < numThreads; i++) {
-        threads.emplace_back(contarPatronesEnRango, std::ref(textoFile), std::ref(patrones), std::ref(contadorPatrones), i * (patrones.size() / numThreads), (i + 1) * (patrones.size() / numThreads) - 1);
+        threads.emplace_back(contarPatronesEnRango, ref(textoFile), ref(patrones), ref(contadorPatrones), i * (patrones.size() / numThreads), (i + 1) * (patrones.size() / numThreads) - 1);
     }
     
     // Esperar a que todos los hilos terminen
-    for (std::thread& thread : threads) {
+    for (thread& thread : threads) {
         thread.join();
     }
     
     // Imprimir resultados
     for (const auto& par : contadorPatrones) {
-        std::cout << "Patrón: " << par.first << " - Cantidad de veces: " << par.second << std::endl;
+        cout << "Patrón: " << par.first << " - Cantidad de veces: " << par.second << endl;
     }
     
     patronesFile.close();

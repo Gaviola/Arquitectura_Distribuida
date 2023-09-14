@@ -111,8 +111,8 @@ void ejecutarConHilos(int N) {
 
 int main() {
     //Mido tiempo
-    timeval time1,time2;
-    gettimeofday(&time1,NULL);
+    timeval time1{},time2{};
+    gettimeofday(&time1,nullptr);
     int N;
 
     cout << "Ingrese el valor de N (tamaño de las matrices NxN): ";
@@ -120,17 +120,17 @@ int main() {
 
     ejecutarSinHilos(N);
     //Calculo tiempo
-    gettimeofday(&time2,NULL);
+    gettimeofday(&time2,nullptr);
     double sinHilos = double(time2.tv_sec - time1.tv_sec) +
     + double(time2.tv_usec-time1.tv_usec)/1000000;
     cout << "Tiempo de ejecucion: " << sinHilos << endl;
 
-    gettimeofday(&time1,NULL);
+    gettimeofday(&time1,nullptr);
 
     ejecutarConHilos(N);
 
     //Calculo tiempo
-    gettimeofday(&time2,NULL);
+    gettimeofday(&time2,nullptr);
     double conHilos = double(time2.tv_sec - time1.tv_sec) +
     + double(time2.tv_usec-time1.tv_usec)/1000000;
     cout << "Tiempo de ejecucion: " << conHilos << endl;
