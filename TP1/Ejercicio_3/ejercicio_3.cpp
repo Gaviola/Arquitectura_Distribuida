@@ -123,7 +123,7 @@ int main() {
     gettimeofday(&time2,nullptr);
     double sinHilos = double(time2.tv_sec - time1.tv_sec) +
     + double(time2.tv_usec-time1.tv_usec)/1000000;
-    cout << "Tiempo de ejecucion: " << sinHilos << endl;
+    cout << "Tiempo de ejecucion sin hilos: " << sinHilos << endl;
 
     gettimeofday(&time1,nullptr);
 
@@ -133,7 +133,7 @@ int main() {
     gettimeofday(&time2,nullptr);
     double conHilos = double(time2.tv_sec - time1.tv_sec) +
     + double(time2.tv_usec-time1.tv_usec)/1000000;
-    cout << "Tiempo de ejecucion: " << conHilos << endl;
+    cout << "Tiempo de ejecucion con hilos: " << conHilos << endl;
 
     cout << "Speedup: " << (sinHilos / conHilos) << endl;
 
