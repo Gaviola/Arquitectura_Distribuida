@@ -135,7 +135,7 @@ int main() {
     + double(time2.tv_usec-time1.tv_usec)/1000000;
     cout << "Tiempo de ejecucion: " << conHilos << endl;
 
-    cout << "Speedup: " << (sinHilos - conHilos) << endl;
+    cout << "Speedup: " << (sinHilos / conHilos) << endl;
 
     return 0;
 }

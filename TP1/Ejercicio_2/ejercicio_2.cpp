@@ -19,8 +19,8 @@ int matchPattern(const string& pattern, const string& line) {
 
 int main() {
     //Leer patrones y almacenarlos en un vector
-    ifstream patronesFile("/home/fgaviola/Desktop/Facultad/3er Año/2do Semestre/Arquitecturas Distribuidas/arquitectura/Arquitectura_Distribuida/TP1/Ejercicio_2/patrones.txt");
-    ifstream textoFile("/home/fgaviola/Desktop/Facultad/3er Año/2do Semestre/Arquitecturas Distribuidas/arquitectura/Arquitectura_Distribuida/TP1/Ejercicio_2/texto.txt");
+    ifstream patronesFile("TP1/Ejercicio_2/patrones.txt");
+    ifstream textoFile("TP1/Ejercicio_2/texto.txt");
 
     if (!patronesFile.is_open() || !textoFile.is_open()) {
         cerr << "No se pudo abrir uno o ambos archivos." << endl;
