@@ -22,7 +22,7 @@ void matchPatternConHilos(string patronActual, string linea, map<string, int>& c
 }
 
 // Función para contar las ocurrencias de un patrón en una línea
-int matchPattern(const string& pattern, const string& line) {
+int matchPattern(const string pattern, const string line) {
     int count = 0;
     size_t pos = 0;
     while ((pos = line.find(pattern, pos)) != string::npos) {
@@ -49,7 +49,7 @@ void sinHilos(ifstream& patronesFile, ifstream& textoFile) {
     while (getline(textoFile, linea)) {
         for (const string& patron : patrones) {
             int count = matchPattern(patron, linea);
-            contadorPatrones[patron] += count;
+            contadorPatrones[patron] = count;
         }
     }
 
@@ -109,8 +109,8 @@ int main() {
 
 
     //Abrir archivos
-    ifstream patronesFile("TP1/Ejercicio_2/patrones.txt");
-    ifstream textoFile("TP1/Ejercicio_2/texto.txt");
+    ifstream patronesFile("/home/bauti/Documents/Facultad/3°/Arquitectura_Distribuida/TP1/Ejercicio_2/patrones.txt");
+    ifstream textoFile("/home/bauti/Documents/Facultad/3°/Arquitectura_Distribuida/TP1/Ejercicio_2/texto.txt");
 
     if (!patronesFile.is_open() || !textoFile.is_open()) {
         cerr << "No se pudo abrir uno o ambos archivos." << endl;
@@ -125,8 +125,8 @@ int main() {
     cout << "Tiempo sin hilos: " << sinHilos << endl;
 
     // Ni idea porque tengo que cerrar y volver a abrir los archivos
-    ifstream patronesFile2("TP1/Ejercicio_2/patrones.txt");
-    ifstream textoFile2("TP1/Ejercicio_2/texto.txt");
+    ifstream patronesFile2("/home/bauti/Documents/Facultad/3°/Arquitectura_Distribuida/TP1/Ejercicio_2/patrones.txt");
+    ifstream textoFile2("/home/bauti/Documents/Facultad/3°/Arquitectura_Distribuida/TP1/Ejercicio_2/texto.txt");
 
     // Mido tiempo con hilos
     gettimeofday(&time1,nullptr);
