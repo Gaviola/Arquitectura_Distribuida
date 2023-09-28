@@ -112,12 +112,12 @@ void ejecutarConHilos(int N) {
 int main() {
     //Mido tiempo
     timeval time1{},time2{};
-    gettimeofday(&time1,nullptr);
     int N;
 
     cout << "Ingrese el valor de N (tamaño de las matrices NxN): ";
     cin >> N;
 
+    gettimeofday(&time1,nullptr);
     ejecutarSinHilos(N);
     //Calculo tiempo
     gettimeofday(&time2,nullptr);
