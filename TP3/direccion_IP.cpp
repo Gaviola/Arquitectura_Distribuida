@@ -9,6 +9,7 @@ Recibe como argumento un puntero que apunta a un array de char en donde se depos
 #include <unistd.h>
 #include <stdlib.h>
 #include <arpa/inet.h>
+#include <iostream>
 
 
 using namespace std;
@@ -16,14 +17,14 @@ using namespace std;
 void obtener_IP(char *respuesta){  
   int mi_socket=socket(AF_INET,SOCK_STREAM,0);
   if(mi_socket==0){
-      cout<<"Error creando el socket"<<endl;
+      cout << "Error creando el socket" << endl;
   }
   struct sockaddr_in servidor_addr, my_addr;
     servidor_addr.sin_family = AF_INET;
     servidor_addr.sin_addr.s_addr = inet_addr("179.0.132.58"); 
     servidor_addr.sin_port = htons(80);
    if(connect(mi_socket, (struct sockaddr *)&servidor_addr, (socklen_t)sizeof(servidor_addr))<0){
-    cout<<"\nError funcion Connect"<<endl;
+    cout << "\nError funcion Connect" << endl;
     exit(1);
   }
   socklen_t len = sizeof(my_addr);
