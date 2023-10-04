@@ -1,3 +1,5 @@
+ssh mpiuser@10.65.1.115
+
 scp -r /home/bauti/Documents/Facultad/3°/Arquitectura_Distribuida/TP3/direccion_IP.cpp mpiuser@10.65.1.215:/home/mpiuser/facu_bauti
 
 from PCA to PCB
