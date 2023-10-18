@@ -5,6 +5,7 @@ scp -r /home/bauti/Documents/Facultad/3°/Arquitectura_Distribuida/TP3/Ejercicio
 from PCA to PCB
 scp -r /path/to/local/directory user_name@ip_address_of_PCB:/path/to/remote/directory
 
-mpic++ -o ej0 ej0.cpp
+mpic++ -o TP3/Ejercicios/ej3.out TP3/Ejercicios/ej3.cpp
+mpirun -n 2 TP3/Ejercicios/ej3.out
 mpirun -n 4 /facu_bauti/ej0
 mpirun --hostfile ips.txt -np 4 ej1 -mca btl_tcp_if_exclude docker0,lo
