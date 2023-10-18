@@ -8,6 +8,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/time.h>
 
 using namespace std;
 
@@ -32,6 +33,10 @@ void obtener_IP(char *respuesta){
 }
 
 int main(int argc, char *argv[]) {
+
+    timeval startTime{},endTime{};
+    gettimeofday(&startTime,nullptr);
+
     MPI_Init(&argc, &argv);
 
     int num_processes, process_rank;
@@ -91,6 +96,10 @@ int main(int argc, char *argv[]) {
         for (int i = 0; i < num_processes; i++) {
             cout << "El patrón " << i << " aparece " << conteos_totales[i] << " veces. Buscado por " << ip_buffer + i * 40 << endl;
         }
+
+        gettimeofday(&endTime,nullptr);
+        double executionTime = double(endTime.tv_sec - startTime.tv_sec) + double(endTime.tv_usec-startTime.tv_usec)/1000000;
+        cout << "Tiempo de ejecucion: " << executionTime << endl;
     }
 
     MPI_Finalize();
