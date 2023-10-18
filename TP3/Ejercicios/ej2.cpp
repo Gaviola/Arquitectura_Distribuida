@@ -38,6 +38,8 @@ int main(int argc, char *argv[]) {
     MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
     MPI_Comm_rank(MPI_COMM_WORLD, &process_rank);
 
+    vector<string> ips;
+
     // Leer los patrones desde el archivo "patrones.txt"
     vector<string> patrones;
     ifstream patrones_file("/home/bauti/Documents/Facultad/3°/Arquitectura_Distribuida/TP3/Ejercicios/patrones.txt");
@@ -66,6 +68,7 @@ int main(int argc, char *argv[]) {
     // Obtener la IP del proceso
     char ip[40];
     obtener_IP(ip);
+    //ips.emplace_back(ip);
 
     // Cada proceso busca su patrón en el texto
     string patron_local = patrones[process_rank];
@@ -78,12 +81,15 @@ int main(int argc, char *argv[]) {
 
     // Recopilar los resultados locales en el proceso 0
     vector<int> conteos_totales(num_processes);
+    char ip_buffer[40 * num_processes];
     MPI_Gather(&conteo_local, 1, MPI_INT, &conteos_totales[0], 1, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Gather(ip, 40, MPI_CHAR, ip_buffer, 40, MPI_CHAR, 0, MPI_COMM_WORLD);
+
 
     // Imprimir los resultados
     if (process_rank == 0) {
         for (int i = 0; i < num_processes; i++) {
-            cout << "El patrón " << i << " aparece " << conteos_totales[i] << " veces. Buscado por " << ip << endl;
+            cout << "El patrón " << i << " aparece " << conteos_totales[i] << " veces. Buscado por " << ip_buffer + i * 40 << endl;
         }
     }
 
