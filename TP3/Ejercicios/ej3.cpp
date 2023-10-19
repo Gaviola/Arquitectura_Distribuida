@@ -17,6 +17,15 @@ void generarMatriz2(vector<vector<float>>& matriz, int N) {
     matriz.resize(N, vector<float>(N, 0.2));
 }
 
+bool IsAllNaN(const float* arr, int size) {
+    for (int i = 0; i < size; i++) {
+        if (!std::isnan(arr[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
 int main(int argc, char** argv) {
     MPI_Init(&argc, &argv);
 
@@ -24,7 +33,7 @@ int main(int argc, char** argv) {
     MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
     MPI_Comm_rank(MPI_COMM_WORLD, &process_rank);
 
-    int N = 300;  // Cambia el valor de N según sea necesario
+    int N = 10;
 
     vector<vector<float>> matriz1, matriz2, matriz_resultante;
     generarMatriz1(matriz1, N);
@@ -52,28 +61,36 @@ int main(int argc, char** argv) {
     }
 
     double suma_total = 0.0;
-    MPI_Reduce(&suma_local, &suma_total, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    MPI_Reduce(&suma_local, &suma_total, 1, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+
+    float nan = std::numeric_limits<double>::quiet_NaN();
 
     // Crear un array para almacenar los resultados de las esquinas
-    double esquinas[4] = {0.0};
+    float esquinas[4] = {nan, nan, nan, nan};
 
     // Obtener los resultados de las esquinas
-    if (std::isnan(matriz_resultante[0][0])) {
+    if (!isnan(matriz_resultante[0][0])) {
         esquinas[0] = matriz_resultante[0][0];
+        cout << "process " << process_rank << "[0][0]" << endl;
     }
-    if (std::isnan(matriz_resultante[0][N - 1])) {
+    if (!isnan(matriz_resultante[0][N - 1])) {
         esquinas[1] = matriz_resultante[0][N - 1];
+        cout << "process " << process_rank << "[0][n]" << endl;
     }
-    if (std::isnan(matriz_resultante[N - 1][0])) {
+    if (!isnan(matriz_resultante[N - 1][0])) {
         esquinas[2] = matriz_resultante[N - 1][0];
+        cout << "process " << process_rank << "[n][0]" << endl;
     }
-    if (std::isnan(matriz_resultante[N - 1][N - 1])) {
+    if (!isnan(matriz_resultante[N - 1][N - 1])) {
         esquinas[3] = matriz_resultante[N - 1][N - 1];
+        cout << "process " << process_rank << "[n][n]" << endl;
     }
 
-    // Recopilar los resultados de las esquinas en el proceso raíz
-    double esquinas_globales[4] = {0.0};
-    MPI_Gather(esquinas, 4, MPI_DOUBLE, esquinas_globales, 4, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    float esquinas_globales[4] = {nan, nan, nan, nan};
+
+    if (!IsAllNaN(esquinas, 4)) {
+        MPI_Gather(&esquinas, 4, MPI_FLOAT, &esquinas_globales, 4, MPI_FLOAT, 0, MPI_COMM_WORLD);
+    }
 
     // Imprimir los resultados de las esquinas solo en el proceso raíz
     if (process_rank == 0) {
