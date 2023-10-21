@@ -1,72 +1,114 @@
-#include <iostream>
-#include <vector>
-#include <cmath>
 #include <mpi.h>
+#include <iostream>
+#include <cmath>
+#include <vector>
+#include <algorithm>
 
-bool es_primo(long long int n, const std::vector<long long int>& primos_hasta_raiz) {
-    for (long long int primo : primos_hasta_raiz) {
-        if (primo * primo > n) break;
-        if (n % primo == 0) return false;
+using namespace std;
+
+
+bool es_primo(long long int numero) {
+    if (numero <= 3) {
+        return true; // 2 es primo
     }
+    if (numero % 2 == 0 || numero % 3 == 0) {
+        return false; // Los múltiplos de 2 o 3 no son primos
+    }
+
+    // Verificar divisibilidad por números mayores a 3
+    for (long long int i = 5; i * i <= numero; i += 6) {
+        if (numero % i == 0 || numero % (i + 2) == 0) {
+            return false;
+        }
+    }
+
     return true;
 }
 
-int main(int argc, char *argv[]) {
+bool esPrimoVector(int numero, vector<int> primos) {
+    // Verificar si el número es divisible por los primos menores o iguales a la raíz cuadrada de N
+    for (long long int primo : primos) {
+        if (primo * primo > numero) {
+            break;
+        }
+        if (numero % primo == 0) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+int main(int argc, char** argv) {
     MPI_Init(&argc, &argv);
 
-    int mi_rango, num_procesos;
-    MPI_Comm_rank(MPI_COMM_WORLD, &mi_rango);
-    MPI_Comm_size(MPI_COMM_WORLD, &num_procesos);
+    int rank, size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    int N = 1000000;
+    int raiz_N = sqrt(N);
 
-    long long int N = 1000000;
-    long long int raiz_N = std::sqrt(N);
-    long long int trozo = (raiz_N + num_procesos - 1) / num_procesos;
-    long long int inicio = mi_rango * trozo;
-    long long int fin = std::min((mi_rango + 1) * trozo, raiz_N);
-
-    std::vector<long long int> primos_hasta_raiz;
-    if (mi_rango == 0) {
-        primos_hasta_raiz.push_back(2);
-        for (long long int i = 3; i <= fin; i += 2) {
-            if (es_primo(i, primos_hasta_raiz)) {
-                primos_hasta_raiz.push_back(i);
-            }
+    //Busco los primos hasta raiz de N
+    vector<int> primos_hasta_raiz_N;
+    for (int i = 2; i <= raiz_N; ++i) {
+        if (es_primo(i)) {
+            primos_hasta_raiz_N.push_back(i);
         }
     }
 
-    MPI_Bcast(&primos_hasta_raiz[0], primos_hasta_raiz.size(), MPI_LONG_LONG, 0, MPI_COMM_WORLD);
+    // Dividir los números entre raiz de n y n entre los procesos
+    int numeros_por_proceso = (N - raiz_N) / size;
+    int inicio = raiz_N + rank * numeros_por_proceso;
+    int fin = inicio + numeros_por_proceso;
 
-    long long int contador = 0;
-    for (long long int i = inicio * inicio + 1; i <= N; i += 2) {
-        if (es_primo(i, primos_hasta_raiz)) {
-            contador++;
+
+    // Busco los primos mayores a raiz de N verificando si son multiplos de los primos hasta raiz de N
+    int count = 0;
+    vector<int> primos;
+    for (int i = inicio; i <= fin; ++i) {
+        if (esPrimoVector(i, primos_hasta_raiz_N)) {
+            count++;
+            primos.push_back(i);
         }
     }
 
-    long long int total_primos;
-    MPI_Reduce(&contador, &total_primos, 1, MPI_LONG_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
-
-    if (mi_rango == 0) {
-        std::cout << "Hay " << total_primos << " números primos menores que " << N << ", siendo los 5 mayores:" << std::endl;
+    // Envio los resultados al proceso maestro
+    if(rank != 0){
+        MPI_Send(&count, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+        MPI_Send(&primos [0], primos.size(), MPI_INT, 0, 0, MPI_COMM_WORLD);
     }
 
-    MPI_Barrier(MPI_COMM_WORLD);
 
-    std::vector<long long int> mayores_primos;
+    // Recibir los resultados de los otros procesos
+    if (rank == 0) {
+        int total_count = count + primos_hasta_raiz_N.size();
+        vector<int> total_primos = primos_hasta_raiz_N;
 
-    for (long long int i = N; i >= 2; i--) {
-        if (es_primo(i, primos_hasta_raiz) && mayores_primos.size() < 5) {
-            mayores_primos.push_back(i);
+        // Recibir resultados de otros procesos
+        for (int i = 1; i < size; ++i) {
+            int count_received;
+            MPI_Recv(&count_received, 1, MPI_INT, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            total_count += count_received;
+
+            // Recibir primos del proceso i
+            vector<int> primos_received(count_received);
+            MPI_Recv(primos_received.data(), count_received, MPI_INT, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+            // Agregar los primos recibidos a la lista total
+            total_primos.insert(total_primos.end(), primos_received.begin(), primos_received.end());
         }
-    }
 
-    if (mi_rango == 0) {
-        for (int i = 0; i < 5; i++) {
-            std::cout << mayores_primos[i] << " ";
+        // Ordenar los primos de manera ascendente
+        sort(total_primos.begin(), total_primos.end());
+
+        // Imprimir resultados
+        cout << "Total de primos menores a n: " << total_count << endl;
+        cout << "Los 10 mayores son: ";
+        for (int i = total_primos.size() - 10; i < total_primos.size(); ++i) {
+            cout << total_primos[i] << " ";
         }
-        std::cout << std::endl;
+        cout << endl;
     }
-
     MPI_Finalize();
     return 0;
 }
