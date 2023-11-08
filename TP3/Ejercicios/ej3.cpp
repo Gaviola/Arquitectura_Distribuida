@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
     MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
     MPI_Comm_rank(MPI_COMM_WORLD, &process_rank);
 
-    int n = 300;
+    int n = 1000;
 
     vector<vector<float>> matriz1, matriz2;
 
